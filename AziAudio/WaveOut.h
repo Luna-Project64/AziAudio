@@ -12,6 +12,8 @@
 #pragma once
 #include <Windows.h>
 
+#include <stdio.h>
+
 typedef struct 
 {
 	// RIFF Header

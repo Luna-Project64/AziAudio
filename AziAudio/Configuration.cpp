@@ -16,11 +16,12 @@
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
 
-
 #ifdef _WIN32
 #include <windows.h>
 extern HINSTANCE hInstance; // DLL's HINSTANCE
 #endif
+
+#include <string>
 
 extern SoundDriverInterface *snd;
 
@@ -50,7 +51,31 @@ static SoundDriverType EnumDriverType[10];
 static int EnumDriverCount;
 #endif
 
-const char *ConfigFile = "Config/AziCfg.bin";
+const char ConfigDir[] = "AziAudio";
+const char ConfigName[] = "AziCfg.bin";
+// const char *ConfigFile = "Config/AziCfg.bin";
+
+#include <Shlobj.h>
+#include <shlwapi.h>
+static std::string ConfigFilePath()
+{
+	TCHAR szPath[MAX_PATH];
+
+	if (FAILED(SHGetFolderPath(NULL,
+		CSIDL_APPDATA,
+		NULL,
+		0,
+		szPath)))
+	{
+		return "Config/AziCfg.bin";
+	}
+
+	PathAppend(szPath, ConfigDir);
+	CreateDirectory(szPath, nullptr);
+
+	PathAppend(szPath, ConfigName);
+	return szPath;
+}
 
 // Dialog Procedures
 #if defined(_WIN32)
@@ -65,7 +90,8 @@ void Configuration::LoadSettings()
 	size_t file_size = 0;
 	unsigned char azicfg[256];
 	FILE *file;
-	file = fopen(ConfigFile, "rb");
+	auto configFile = ConfigFilePath();
+	file = fopen(configFile.c_str(), "rb");
 	memset(azicfg, 0, sizeof(azicfg));
 	if (file == NULL)
 	{
@@ -106,8 +132,9 @@ void Configuration::LoadSettings()
 }
 void Configuration::SaveSettings()
 {
+	auto configFile = ConfigFilePath();
 	FILE *file;
-	file = fopen(ConfigFile, "wb");
+	file = fopen(configFile.c_str(), "wb");
 	if (file != NULL)
 	{
 		fprintf(file, "%c", getSyncAudio());
@@ -151,7 +178,7 @@ void Configuration::LoadDefaults()
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
 	setDriver(SoundDriverFactory::DefaultDriver());	
 	setAIEmulation(true);
-	setSyncAudio(true);
+	setSyncAudio(false);
 	setForceSync(false);
 	setVolume(0);
 	setFrequency(44100);
@@ -161,7 +188,7 @@ void Configuration::LoadDefaults()
 	setBackendFPS(90);
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
-	setResTimer(false);
+	setResTimer(true);
 	LoadSettings();
 }
 #ifdef _WIN32

@@ -336,24 +336,45 @@ void RedirectIOToConsole() {
 #endif
 }
 
+#endif
 
 #ifdef _WIN32
+
+typedef LONG(NTAPI* pSetTimerResolution)(ULONG RequestedResolution, BOOLEAN Set, PULONG ActualResolution);
+typedef LONG(NTAPI* pQueryTimerResolution)(PULONG MinimumResolution, PULONG MaximumResolution, PULONG CurrentResolution);
+
 /*
 	Time resolution code borrowed from Project64-Audio
 	Will be set as an optional parameter
- 
+
  */
 void SetTimerResolution(void)
 {
-	HMODULE hMod = GetModuleHandle("ntdll.dll");
-	if (hMod != NULL)
+	LONG status;
+	pSetTimerResolution setFunction;
+	pQueryTimerResolution queryFunction;
+	ULONG minResolution, maxResolution, actualResolution;
+	const HINSTANCE hLibrary = LoadLibrary("NTDLL.dll");
+	if (hLibrary == NULL)
 	{
-		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN BOOLEAN SetResolution, OUT PULONG CurrentResolution);
-		tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hMod, "NtSetTimerResolution");
-		ULONG CurrentResolution = 0;
-		NtSetTimerResolution(10000, TRUE, &CurrentResolution);
+		return;
 	}
-}
-#endif
 
+	queryFunction = (pQueryTimerResolution)GetProcAddress(hLibrary, "NtQueryTimerResolution");
+	if (queryFunction == NULL)
+	{
+		return;
+	}
+
+	queryFunction(&minResolution, &maxResolution, &actualResolution);
+	printf("Win32 Timer Resolution:\n\tMinimum Value:\t%u\n\tMaximum Value:\t%u\n\tActual Value:\t%u\n\n", minResolution, maxResolution, actualResolution);
+
+	setFunction = (pSetTimerResolution)GetProcAddress(hLibrary, "NtSetTimerResolution");
+	if (setFunction == NULL)
+	{
+		return;
+	}
+
+	status = setFunction(maxResolution, TRUE, &actualResolution);
+}
 #endif
