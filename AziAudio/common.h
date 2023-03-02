@@ -123,10 +123,10 @@ extern rSettings RegSettings;
 	   PLUGIN_DEBUG 
 
 #define PLUGIN_VERSION \
-"LINK Azimer's " \
+"LINK's Azimer's " \
 PLUGIN_NAME \
 PLUGIN_RELEASE \
-PLUGIN_BUILD
+PLUGIN_BUILD " [2023]" 
 
 
 #ifdef ENABLEPROFILING

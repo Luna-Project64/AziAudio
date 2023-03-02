@@ -20,7 +20,7 @@
 class WASAPISoundDriver :
 	public SoundDriver
 {
-	friend DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter);
+	// friend DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter);
 public:
 	WASAPISoundDriver();
 	~WASAPISoundDriver();

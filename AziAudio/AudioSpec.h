@@ -213,7 +213,7 @@ EXPORT void CALL AiCallBack(void);
 
 extern AUDIO_INFO AudioInfo;
 
-void HLEStart ();
+void HLEStart (void);
 void ChangeABI (int type); /* type 0 = SafeMode */
 
 #define AI_STATUS_FIFO_FULL	0x80000000		/* Bit 31: full */
