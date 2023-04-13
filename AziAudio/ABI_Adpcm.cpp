@@ -31,7 +31,7 @@ void ADPCM_madd(s32* a, s16* book1, s16* book2, s16 l1, s16 l2, s16* inp)
 #endif
 	s32 accumulators[4];
 	s16 b[8];
-	register int i;
+	int i;
 
 #if defined(SSE2_SUPPORT)
 	xmm_source = _mm_set1_epi16(l1);

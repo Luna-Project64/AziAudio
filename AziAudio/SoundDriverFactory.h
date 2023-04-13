@@ -12,9 +12,17 @@
 #include "common.h"
 #include "SoundDriverInterface.h"
 
+#define SOUND_DRIVER(name) extern void name##Probe();
+#include "XDrivers.h"
+#undef SOUND_DRIVER
+
 class SoundDriverFactory
 {
 private:
+#define SOUND_DRIVER(name) friend void ::name##Probe();
+#include "XDrivers.h"
+#undef SOUND_DRIVER
+
 	typedef SoundDriverInterface* (*SoundDriverCreationFunction)();
 	struct FactoryDriversStruct
 	{
@@ -29,11 +37,13 @@ private:
 	static int FactoryNextSlot;
 	static const int MAX_FACTORY_DRIVERS = 20;
 	static FactoryDriversStruct FactoryDrivers[MAX_FACTORY_DRIVERS];
+	static bool RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, char* Description, int Priority);
+
 public:
 	~SoundDriverFactory() {};
 
+	static void Initialize();
 	static SoundDriverInterface* CreateSoundDriver(SoundDriverType DriverID);
-	static bool RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, char *Description, int Priority);
 	static SoundDriverType DefaultDriver();
 	static int EnumDrivers(SoundDriverType *drivers, int max_entries);
 	static const char* GetDriverDescription(SoundDriverType driver);

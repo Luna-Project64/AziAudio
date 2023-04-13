@@ -49,6 +49,10 @@
       <AdditionalIncludeDirectories>$(SolutionDir)3rd Party\directx\include</AdditionalIncludeDirectories>
       <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VectorCall</CallingConvention>
       <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VectorCall</CallingConvention>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(SolutionDir)3rd Party\directx\lib\x86</AdditionalLibraryDirectories>
@@ -74,6 +78,7 @@
     <ClInclude Include="Mupen64plusHLE\ucodes.h" />
     <ClInclude Include="my_types.h" />
     <ClInclude Include="NoSoundDriver.h" />
+    <ClInclude Include="QueueExecutor.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="SoundDriver.h" />
@@ -85,6 +90,7 @@
     <ClInclude Include="WaveOutSoundDriver.h" />
     <ClInclude Include="XAudio2SoundDriver.h" />
     <ClInclude Include="XAudio2SoundDriverLegacy.h" />
+    <ClInclude Include="XDrivers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ABI1.cpp" />
@@ -107,10 +113,12 @@
     <ClCompile Include="Mupen64plusHLE\Mupen64Support.c" />
     <ClCompile Include="Mupen64plusHLE\musyx.c" />
     <ClCompile Include="NoSoundDriver.cpp" />
+    <ClCompile Include="QueueExecutor.cpp" />
     <ClCompile Include="SoundDriver.cpp" />
     <ClCompile Include="SoundDriverFactory.cpp" />
     <ClCompile Include="SoundDriverInterface.cpp" />
     <ClCompile Include="SoundDriverLegacy.cpp" />
+    <ClCompile Include="SoundDriverRegistrar.h" />
     <ClCompile Include="WASAPISoundDriver.cpp" />
     <ClCompile Include="WaveOut.cpp" />
     <ClCompile Include="WaveOutSoundDriver.cpp" />

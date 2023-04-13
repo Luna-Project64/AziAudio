@@ -15,11 +15,9 @@
 #include "DirectSoundDriver.h"
 #include "AudioSpec.h"
 //#include "WaveOut.h"
-#include "SoundDriverFactory.h"
+#include "SoundDriverRegistrar.h"
 
-bool DirectSoundDriver::ClassRegistered = DirectSoundDriver::ValidateDriver() ?
-			SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8, DirectSoundDriver::CreateSoundDriver, "DirectSound 8 Driver", 6) :
-			false;
+REGISTER_DRIVER(DirectSoundDriver, SND_DRIVER_DS8, "DirectSound 8 Driver", 6)
 
 // TODO: Clean this up a bit...
 static DWORD sLOCK_SIZE;

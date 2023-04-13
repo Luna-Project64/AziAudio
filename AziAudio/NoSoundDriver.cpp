@@ -12,14 +12,12 @@
 	NoSound Driver to demonstrate how to use the SoundDriver interface
 */
 #include "NoSoundDriver.h"
-#include "SoundDriverFactory.h"
+#include "SoundDriverRegistrar.h"
 #if !defined(_WIN32) && !defined(_XBOX)
 #include <unistd.h>
 #endif
 
-bool NoSoundDriver::ClassRegistered = NoSoundDriver::ValidateDriver() ?
-		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0) :
-		false;
+REGISTER_DRIVER(NoSoundDriver, SND_DRIVER_NOSOUND, "No Sound Driver", 0)
 
 bool NoSoundDriver::ValidateDriver()
 {

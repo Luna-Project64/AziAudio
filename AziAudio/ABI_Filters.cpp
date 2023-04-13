@@ -51,7 +51,7 @@ s32 rdot_ABI(size_t n, const s16 *x, const s16 *y)
 #endif
 	s32 accumulators[4];
 	s16 b[8]; /* (n <= 8) in all calls to this function. */
-	register size_t i;
+	size_t i;
 
 	y += n;
 	--y;

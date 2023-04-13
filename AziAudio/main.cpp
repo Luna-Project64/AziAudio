@@ -16,6 +16,7 @@
 #include "SoundDriverFactory.h"
 
 #include "audiohle.h"
+#include "QueueExecutor.h"
 //#include "rsp/rsp.h"
 
 #include <string.h> // memcpy(), strcpy()
@@ -29,6 +30,7 @@
 #endif
 
 SoundDriverInterface *snd = NULL;
+QueueExecutor* executor = NULL;
 
 bool ai_delayed_carry;  // Borrowed from MAME and Mupen64Plus
 bool bBackendChanged = false;
@@ -95,10 +97,27 @@ AUDIO_INFO AudioInfo;
 u32 Dacrate = 0;
 
 EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
+	if (!executor)
+	{
+		executor = new QueueExecutor;
+		executor->start();
+	}
+
+	static std::once_flag Flag;
+	std::call_once(Flag, []()
+	{
+		executor->sync([]()
+		{
+			SoundDriverFactory::Initialize();
+		});
+	});
+
 	if (snd != NULL)
 	{
-		snd->AI_Shutdown();
-		delete snd;
+		executor->async([]() {
+			snd->AI_Shutdown();
+			delete snd;
+		});
 	}
 
 #ifdef USE_PRINTF
@@ -119,12 +138,16 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 	IMEM = Audio_Info.IMEM;
 
 	Configuration::LoadDefaults();
-	snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
+	executor->sync([]() {
+		snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
+	});
 
 	if (snd == NULL)
 		return FALSE;
 
-	snd->AI_Startup();
+	executor->sync([]() {
+		snd->AI_Startup();
+	});
 	ai_delayed_carry = false;
 	return TRUE;
 }
@@ -133,10 +156,15 @@ EXPORT void CALL CloseDLL(void) {
 	DEBUG_OUTPUT("Call: CloseDLL()\n");
 	if (snd != NULL)
 	{
-		snd->AI_Shutdown();
-		delete snd;
-		snd = NULL;
+		executor->sync([]() {
+			snd->AI_Shutdown();
+			delete snd;
+			snd = NULL;
+		});
 	}
+
+	delete executor;
+	executor = NULL;
 }
 
 EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo) {
@@ -167,18 +195,21 @@ EXPORT void CALL RomClosed(void)
 	Dacrate = 0; // Forces a revisit to initialize audio
 	if (snd == NULL)
 		return;
-	if (bBackendChanged == true)
-	{
-		snd->AI_Shutdown();
-		delete snd;
-		snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
-		snd->AI_Startup();
-		bBackendChanged = false;
-	}
-	else
-	{
-		snd->AI_ResetAudio();
-	}
+
+	executor->sync([]() {
+		if (bBackendChanged == true)
+		{
+			snd->AI_Shutdown();
+			delete snd;
+			snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
+			snd->AI_Startup();
+			bBackendChanged = false;
+		}
+		else
+		{
+			snd->AI_ResetAudio();
+		}
+	});
 }
 
 EXPORT void CALL AiDacrateChanged(int SystemType) {
@@ -227,7 +258,9 @@ EXPORT void CALL AiDacrateChanged(int SystemType) {
 		DEBUG_OUTPUT("Unable to standardize Frequeny!\n");
 #endif
 	DEBUG_OUTPUT("Frequency = %i\n", Frequency);
-	snd->AI_SetFrequency(Frequency);
+	executor->sync([=]() {
+		snd->AI_SetFrequency(Frequency);
+	});
 }
 
 EXPORT void CALL AiLenChanged(void) 

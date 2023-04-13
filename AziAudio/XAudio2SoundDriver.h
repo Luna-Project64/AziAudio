@@ -86,7 +86,6 @@ protected:
 private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
-	static bool ClassRegistered;
 };
 
 /*

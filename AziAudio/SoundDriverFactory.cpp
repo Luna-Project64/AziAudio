@@ -11,8 +11,27 @@
 #include "SoundDriverFactory.h"
 #include "NoSoundDriver.h"
 
+#include <thread>
+
 int SoundDriverFactory::FactoryNextSlot = 0;
 SoundDriverFactory::FactoryDriversStruct SoundDriverFactory::FactoryDrivers[MAX_FACTORY_DRIVERS];
+
+typedef void (*ProbeFn)(void);
+static const ProbeFn sDriverInitFunctions[]
+{
+#define SOUND_DRIVER(name) ::name##Probe,
+#include "XDrivers.h"
+#undef SOUND_DRIVER
+};
+
+void SoundDriverFactory::Initialize()
+{
+	// CoInitialize might be called from other threads than the main one
+	for (auto fn : sDriverInitFunctions)
+	{
+		fn();
+	}
+}
 
 SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType DriverID)
 {

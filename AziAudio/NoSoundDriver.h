@@ -62,7 +62,4 @@ protected:
 	*/
 	bool isPlaying;
 	u32 lastTick;
-
-private:
-	static bool ClassRegistered;
 };

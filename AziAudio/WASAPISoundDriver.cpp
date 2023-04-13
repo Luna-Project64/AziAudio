@@ -14,13 +14,12 @@
 #include "WASAPISoundDriver.h"
 #include "AudioSpec.h"
 #include <stdio.h>
-#include "SoundDriverFactory.h"
+#include "SoundDriverRegistrar.h"
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 
-bool WASAPISoundDriver::ClassRegistered = WASAPISoundDriver::ValidateDriver() ?
-					SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WASAPI, WASAPISoundDriver::CreateSoundDriver, "WASAPI Driver (experimental)", 0) :
-					false;
+REGISTER_DRIVER(WASAPISoundDriver, SND_DRIVER_WASAPI, "WASAPI Driver (experimental)", 0)
+
 // REFERENCE_TIME time units per second and per millisecond
 #define REFTIMES_PER_SEC  10000000
 #define REFTIMES_PER_MILLISEC  10000

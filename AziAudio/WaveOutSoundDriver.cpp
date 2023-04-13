@@ -14,15 +14,13 @@
 #include "WaveOutSoundDriver.h"
 #include "AudioSpec.h"
 #include <stdio.h>
-#include "SoundDriverFactory.h"
+#include "SoundDriverRegistrar.h"
 
 #pragma comment(lib, "winmm.lib")
 
 WaveOutSoundDriver* WaveOutSoundDriver::m_Instance;
 
-bool WaveOutSoundDriver::ClassRegistered = ValidateDriver() ?
-		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WAVEOUT, WaveOutSoundDriver::CreateSoundDriver, "WaveOut Driver", 1) :
-		false;
+REGISTER_DRIVER(WaveOutSoundDriver, SND_DRIVER_WAVEOUT, "WaveOut Driver", 1)
 
 /*
 	Will verify the driver can run in the configured environment

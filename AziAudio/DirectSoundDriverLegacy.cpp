@@ -15,11 +15,9 @@
 #include "DirectSoundDriverLegacy.h"
 #include "AudioSpec.h"
 //#include "WaveOut.h"
-#include "SoundDriverFactory.h"
+#include "SoundDriverRegistrar.h"
 
-bool DirectSoundDriverLegacy::ClassRegistered = DirectSoundDriverLegacy::ValidateDriver() ?
-			SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8L, DirectSoundDriverLegacy::CreateSoundDriver, "DirectSound 8 Legacy Driver", 5) :
-			false;
+REGISTER_DRIVER(DirectSoundDriverLegacy, SND_DRIVER_DS8L, "DirectSound 8 Legacy Driver", 5)
 
 // TODO: Clean this up a bit...
 

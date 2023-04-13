@@ -59,7 +59,6 @@ private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
 	bool   m_CoUninit;
-	static bool ClassRegistered;
 };
 
 #if !defined(_MSC_VER)
