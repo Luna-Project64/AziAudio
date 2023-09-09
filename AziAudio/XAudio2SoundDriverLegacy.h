@@ -16,6 +16,9 @@
 #endif
 
 #include "SoundDriverLegacy.h"
+
+// #define WDK_NTDDI_VERSION                   NTDDI_WIN8_NI
+#define _WIN32_WINNT _WIN32_WINNT_WIN8
 #include <xaudio2.h>
 
 class VoiceCallbackLegacy : public IXAudio2VoiceCallback
