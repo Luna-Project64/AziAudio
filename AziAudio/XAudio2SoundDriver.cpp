@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include "SoundDriverRegistrar.h"
 
+#include <psapi.h>
+#include <algorithm>
+#include <string>
+
 REGISTER_DRIVER(XAudio2SoundDriver, SND_DRIVER_XA2, "XAudio2 Driver", 15)
 
 static IXAudio2* g_engine;
@@ -95,6 +99,14 @@ BOOL XAudio2SoundDriver::Initialize()
 	return false;
 }
 
+static std::string str_tolower(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(),
+		[](unsigned char c) { return std::tolower(c); } // correct
+	);
+	return s;
+}
+
 BOOL XAudio2SoundDriver::Setup()
 {
 	if (dllInitialized == true) return true;
@@ -144,6 +156,38 @@ BOOL XAudio2SoundDriver::Setup()
 		g_engine->Release();
 		CoUninitialize();
 		return -3;
+	}
+
+	{
+		static bool sXaudioPinned = false;
+		if (!sXaudioPinned)
+		{
+			HMODULE hMods[1024];
+			DWORD cbNeeded;
+			unsigned int i;
+
+			if (EnumProcessModules(GetCurrentProcess(), hMods, sizeof(hMods), &cbNeeded))
+			{
+				for (i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
+				{
+					TCHAR szModName[MAX_PATH];
+					if (!GetModuleBaseName(GetCurrentProcess(), hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR)))
+						continue;
+
+					std::string lower = str_tolower(szModName);
+					if (lower.find("xaudio") == std::string::npos)
+						continue;
+
+					if (!GetModuleFileNameEx(GetCurrentProcess(), hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR)))
+						continue;
+
+					// pin XAudio library forever
+					HANDLE pinnedHandle = LoadLibrary(szModName);
+					(void)pinnedHandle;
+					sXaudioPinned = true;
+				}
+			}
+		}
 	}
 
 	g_source->Start();
