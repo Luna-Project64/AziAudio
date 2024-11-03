@@ -203,9 +203,6 @@
     <ClCompile Include="WaveOutSoundDriver.cpp">
       <Filter>Source Files\Sound Driver</Filter>
     </ClCompile>
-    <ClCompile Include="SoundDriverRegistrar.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="QueueExecutor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

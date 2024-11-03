@@ -100,7 +100,7 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 	if (!executor)
 	{
 		executor = new QueueExecutor;
-		executor->start();
+		executor->start(true);
 	}
 
 	static std::once_flag Flag;

@@ -126,7 +126,7 @@ extern rSettings RegSettings;
 "LINK's Azimer's " \
 PLUGIN_NAME \
 PLUGIN_RELEASE \
-PLUGIN_BUILD " [Sep 2023]" 
+PLUGIN_BUILD " [Nov 2024]" 
 
 
 #ifdef ENABLEPROFILING

@@ -61,6 +61,7 @@ bool DirectSoundDriver::ValidateDriver()
 }
 
 DWORD WINAPI AudioThreadProc(DirectSoundDriver *ac) {
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 	DWORD dwStatus;
 	//DWORD last_play_pos = 0, bytesMoved = 0;
 	//LPDIRECTSOUNDBUFFER8  lpdsbuf = ac->lpdsbuf;

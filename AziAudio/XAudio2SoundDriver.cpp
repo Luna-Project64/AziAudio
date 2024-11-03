@@ -275,6 +275,7 @@ void XAudio2SoundDriver::AiUpdate(BOOL Wait)
 
 DWORD WINAPI XAudio2SoundDriver::AudioThreadProc(LPVOID lpParameter)
 {
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 	XAudio2SoundDriver* driver = (XAudio2SoundDriver*)lpParameter;
 	static int idx = 0;  // TODO: This needs to be moved...
 

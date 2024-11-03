@@ -1,158 +1,78 @@
 #include "QueueExecutor.h"
-
-QueueExecutor::QueueExecutor()
-    : running_(false)
-{
-}
-
-void QueueExecutor::syncInternal(Fn fn)
-try
-{
-    SyncTask task{ synch_, std::move(fn) };
-    {
-        std::unique_lock<std::mutex> lck(mutex_);
-        tasks_.emplace_back(&task);
-    }
-
-    cv_.notify_one();
-    task.event().wait();
-}
-catch (...)
-{
-}
-
-void QueueExecutor::sync(Fn fn)
-try
-{
-    if (!acceptsTasks_)
-        return;
-
-    return syncInternal(std::move(fn));
-}
-catch (...)
-{
-}
-
-void QueueExecutor::asyncInternal(Fn fn)
-try
-{
-    auto task = std::make_unique<AsyncTask>(std::move(fn));
-    {
-        std::unique_lock<std::mutex> lck(mutex_);
-        tasks_.emplace_back(std::move(task));
-    }
-
-    cv_.notify_one();
-}
-catch (...)
-{
-}
-
-void QueueExecutor::async(Fn fn)
-try
-{
-    if (!acceptsTasks_)
-        return;
-
-    return asyncInternal(std::move(fn));
-}
-catch (...)
-{
-}
-
-void QueueExecutor::asyncOnce(Fn fn)
-try
-{
-    if (!acceptsTasks_)
-        return;
-
-    auto task = std::make_unique<AsyncTask>(std::move(fn));
-    {
-        std::unique_lock<std::mutex> lck(mutex_);
-        if (!tasks_.empty())
-            return;
-
-        tasks_.emplace_back(std::move(task));
-    }
-
-    cv_.notify_one();
-}
-catch (...)
-{
-}
-
-QueueExecutor::~QueueExecutor()
-{
-    stop();
-}
-
-DWORD WINAPI QueueExecutor::loopProxy(LPVOID ptr)
-{
-    reinterpret_cast<QueueExecutor*>(ptr)->loop();
-    return 0;
-}
-
-void QueueExecutor::loop()
-{
-    std::unique_lock<std::mutex> lck(mutex_);
-    while (running_)
-    {
-        if (tasks_.empty())
-            cv_.wait(lck, [&] { return !tasks_.empty(); });
-
-        auto task = std::move(tasks_.front());
-        lck.unlock();
-
-        try
-        {
-            if (auto sync = std::get_if<SyncTaskPtr>(&task))
-            {
-                (*sync)->run();
-            }
-            if (auto async = std::get_if<AsyncTaskPtr>(&task))
-            {
-                (*async)->run();
-            }
-        }
-        catch (...)
-        {
-        }
-
-        lck.lock();
-        tasks_.pop_front();
-    }
-}
-
-void QueueExecutor::start()
-{
+void QueueExecutor::start(bool allowSameThreadExec, Task fn) {
     if (running_)
         return;
 
     running_ = true;
-    executor_ = CreateThread(NULL, NULL, &QueueExecutor::loopProxy, this, NULL, &executorTid_);
-    acceptsTasks_ = true;
+    canSubmit_ = true;
+    allowSameThreadExec_ = allowSameThreadExec;
+    tasks_.clear();
+    executor_ = std::thread{ &QueueExecutor::loop, this };
+    if (fn)
+        async(std::move(fn));
 }
 
-void QueueExecutor::stop()
+bool QueueExecutor::async(Task task) {
+    bool notify;
+    {
+        std::unique_lock<std::mutex> lck(mutex_);
+        if (!canSubmit_)
+            return false;
+
+        notify = !hasPendingTasks();
+        tasks_.emplace_back(std::move(task));
+    }
+
+    if (notify)
+        cv_.notify_one();
+
+    return true;
+}
+
+void QueueExecutor::stop(Task task) {
+    stopAsync(std::move(task));
+    stopWait();
+}
+
+bool QueueExecutor::stopAsync(Task task)
 {
     if (!running_)
-        return;
-
-    acceptsTasks_ = false;
-    asyncInternal([&]()
-        {
-            running_ = false;
-        });
-    WaitForSingleObject(executor_, INFINITE);
-    CloseHandle(executor_);
-}
-
-bool QueueExecutor::disableTasksAndAsync(Fn fn)
-{
-    if (!acceptsTasks_)
         return false;
 
-    acceptsTasks_ = false;
-    asyncInternal(std::move(fn));
+    bool notify;
+    {
+        std::unique_lock<std::mutex> lck(mutex_);
+        canSubmit_ = false;
+        notify = !hasPendingTasks();
+        tasks_.emplace_back([this, aTask(std::move(task))]() {
+            running_ = false;
+            if (aTask) aTask();
+        });
+    }
+
+    if (notify)
+        cv_.notify_one();
+
     return true;
+}
+
+void QueueExecutor::stopWait()
+{
+    executor_.join();
+}
+
+void QueueExecutor::loop() {
+    std::unique_lock<std::mutex> lck(mutex_);
+    while (running_) {
+        if (!hasPendingTasksForExecutor())
+            cv_.wait(lck, [&] { return hasPendingTasksForExecutor(); });
+
+        auto task = std::move(tasks_.front());
+        lck.unlock();
+
+        task();
+
+        lck.lock();
+        tasks_.pop_front();
+    }
 }

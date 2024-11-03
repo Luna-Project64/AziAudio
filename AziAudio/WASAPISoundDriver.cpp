@@ -142,6 +142,7 @@ void WASAPISoundDriver::SetVolume(u32 volume)
 
 DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter)
 {
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 	WASAPISoundDriver* driver = (WASAPISoundDriver*)lpParameter;
 	REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_MILLISEC * (1000 / Configuration::getBackendFPS()) * Configuration::getBufferLevel();
 	REFERENCE_TIME hnsActualDuration;
