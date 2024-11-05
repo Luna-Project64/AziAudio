@@ -156,7 +156,7 @@ EXPORT void CALL CloseDLL(void) {
 	DEBUG_OUTPUT("Call: CloseDLL()\n");
 	if (snd != NULL)
 	{
-		executor->sync([]() {
+		executor->stop([]() {
 			snd->AI_Shutdown();
 			delete snd;
 			snd = NULL;
