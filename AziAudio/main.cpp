@@ -156,11 +156,25 @@ EXPORT void CALL CloseDLL(void) {
 	DEBUG_OUTPUT("Call: CloseDLL()\n");
 	if (snd != NULL)
 	{
-		executor->stop([]() {
+		DWORD selfThread = GetCurrentThreadId();
+		executor->stopAsync([=]() {
 			snd->AI_Shutdown();
 			delete snd;
 			snd = NULL;
+			PostThreadMessage(selfThread, WM_APP + 1, 0, 0);
 		});
+
+		bool running = true;
+		MSG msg;
+		while (running && GetMessage(&msg, 0, 0, 0))
+		{
+			if (msg.message == WM_APP + 1 && !running)
+				break;
+
+			DispatchMessage(&msg);
+		}
+
+		executor->stopWait();
 	}
 
 	delete executor;
