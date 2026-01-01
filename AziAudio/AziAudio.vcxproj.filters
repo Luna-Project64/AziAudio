@@ -114,6 +114,9 @@
     <ClInclude Include="QueueExecutor.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="XAudio2SoundDriverModern.h">
+      <Filter>Source Files\Sound Driver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectSoundDriver.cpp">
@@ -205,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="QueueExecutor.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudio2SoundDriverModern.cpp">
+      <Filter>Source Files\Sound Driver</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

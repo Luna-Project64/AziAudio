@@ -55,19 +55,24 @@ const char ConfigDir[] = "AziAudio";
 const char ConfigName[] = "AziCfg.bin";
 // const char *ConfigFile = "Config/AziCfg.bin";
 
+extern char gPluginConfigDir[MAX_PATH];
+
 #include <Shlobj.h>
 #include <shlwapi.h>
 static std::string ConfigFilePath()
 {
-	TCHAR szPath[MAX_PATH];
-
-	if (FAILED(SHGetFolderPath(NULL,
-		CSIDL_APPDATA,
-		NULL,
-		0,
-		szPath)))
+	char szPath[MAX_PATH];
+	if (*gPluginConfigDir)
 	{
-		return "Config/AziCfg.bin";
+		strcpy_s(szPath, MAX_PATH, gPluginConfigDir);
+	}
+	else
+	{
+		SHGetFolderPath(NULL,
+			CSIDL_APPDATA,
+			NULL,
+			0,
+			szPath);
 	}
 
 	PathAppend(szPath, ConfigDir);

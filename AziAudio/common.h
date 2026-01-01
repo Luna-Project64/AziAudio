@@ -72,6 +72,7 @@ enum SoundDriverType
 	SND_DRIVER_XA2 = 0x1013,
 	SND_DRIVER_WASAPI = 0x1014,
 	SND_DRIVER_WAVEOUT = 0x1015,
+	SND_DRIVER_XA2_MODERN = 0x1016,
 // Cross Platform
 	SND_DRIVER_PORTAUDIO = 0x1100  // NYI
 };
@@ -126,7 +127,7 @@ extern rSettings RegSettings;
 "LINK's Azimer's " \
 PLUGIN_NAME \
 PLUGIN_RELEASE \
-PLUGIN_BUILD " [Dec 2024]"
+PLUGIN_BUILD " [Jan 2026]"
 
 
 #ifdef ENABLEPROFILING

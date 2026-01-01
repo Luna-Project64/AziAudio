@@ -10,20 +10,19 @@
 ****************************************************************************/
 
 #pragma once
-#define _WIN32_WINNT 0x0601
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
 #include "SoundDriver.h"
-#include <xaudio27.h>
+#include <xaudio2.h>
 
-class VoiceCallback : public IXAudio2VoiceCallback
+class VoiceCallbackModern : public IXAudio2VoiceCallback
 {
 public:
 	//HANDLE hBufferEndEvent;
-	VoiceCallback() /*: hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))*/{}
-	~VoiceCallback(){/* CloseHandle(hBufferEndEvent); */}
+	VoiceCallbackModern() /*: hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))*/{}
+	~VoiceCallbackModern(){/* CloseHandle(hBufferEndEvent); */}
 
 	//Called when the voice has just finished playing a contiguous audio stream.
 	void __stdcall OnStreamEnd() {/* SetEvent(hBufferEndEvent); */}
@@ -48,12 +47,12 @@ public:
 	*/
 };
 
-class XAudio2SoundDriver :
+class XAudio2SoundDriverModern :
 	public SoundDriver
 {	
 public:
-	XAudio2SoundDriver();
-	~XAudio2SoundDriver();
+	XAudio2SoundDriverModern();
+	~XAudio2SoundDriverModern();
 	
 	// Setup and Teardown Functions
 	BOOL Initialize();
@@ -75,7 +74,7 @@ public:
 
 	void SetVolume(u32 volume);
 
-	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriver(); }
+	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriverModern(); }
 	static bool ValidateDriver();
 
 protected:
