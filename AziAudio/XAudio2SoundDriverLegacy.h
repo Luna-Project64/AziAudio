@@ -16,7 +16,7 @@
 #endif
 
 #include "SoundDriverLegacy.h"
-#include <xaudio2.h>
+#include <xaudio27.h>
 
 class VoiceCallbackLegacy : public IXAudio2VoiceCallback
 {
