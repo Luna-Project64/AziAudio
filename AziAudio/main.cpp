@@ -164,11 +164,10 @@ EXPORT void CALL CloseDLL(void) {
 			PostThreadMessage(selfThread, WM_APP + 1, 0, 0);
 		});
 
-		bool running = true;
 		MSG msg;
-		while (running && GetMessage(&msg, 0, 0, 0))
+		while (GetMessage(&msg, 0, 0, 0))
 		{
-			if (msg.message == WM_APP + 1 && !running)
+			if (msg.message == WM_APP + 1)
 				break;
 
 			DispatchMessage(&msg);
