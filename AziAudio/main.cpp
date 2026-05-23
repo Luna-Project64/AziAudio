@@ -313,7 +313,6 @@ EXPORT void CALL AiUpdate(Boolean Wait) {
 		return;
 	}
 	snd->AI_Update(Wait);
-	return;
 }
 
 char gPluginConfigDir[MAX_PATH]{};

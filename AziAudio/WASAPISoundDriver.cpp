@@ -306,11 +306,7 @@ u32 WASAPISoundDriver::LoadAiBufferResample(u8 *start, u32 frames, float ratio)
 		return frames;
 	}
 
-#ifdef _WIN32
-	WaitForSingleObject(m_hMutex, INFINITE);
-#else
-	puts("[LoadAIBuffer] To do:  non-Win32 m_hMutex");
-#endif
+	std::lock_guard lck(m_mutex);
 
 	// Step 0: Replace depleted stored buffer for next run
 	BufferAudio();
@@ -358,11 +354,6 @@ u32 WASAPISoundDriver::LoadAiBufferResample(u8 *start, u32 frames, float ratio)
 	// Step 3: Replace depleted stored buffer for next run
 	BufferAudio();
 
-#ifdef _WIN32
-	ReleaseMutex(m_hMutex);
-#else
-	// to do
-#endif
 	assert(samplesToMove == 0);
 	return (frames - samplesToMove);
 }
