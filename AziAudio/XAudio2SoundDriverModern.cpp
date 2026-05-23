@@ -38,8 +38,13 @@ static VoiceCallbackModern voiceCallback;
 
 bool XAudio2SoundDriverModern::ValidateDriver()
 {
-	// We are targetting Windows 10 here for now
-	return true;
+	auto hndl = LoadLibraryEx(XAUDIO2_DLL, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+	if (hndl)
+	{
+		FreeLibrary(hndl);
+	}
+
+	return !!hndl;
 }
 
 XAudio2SoundDriverModern::XAudio2SoundDriverModern()
@@ -198,13 +203,25 @@ void XAudio2SoundDriverModern::SetFrequency(u32 Frequency)
 	if (Frequency < 1000)
 		return;
 
+	if (hAudioThread != NULL)
+	{
+		if (Frequency == iCurFrequency)
+			return;
+
+		StopAudioThread();
+		Teardown();
+		Setup();
+	}
+
 	if (Setup() < 0) /* failed to apply a sound device */
 		return;
+
 	cacheSize = (u32)((Frequency / Configuration::getBackendFPS())) * 4;
 	g_source->FlushSourceBuffers();
 	g_source->SetSourceSampleRate(Frequency);
 
 	StartAudioThread();
+	iCurFrequency = Frequency;
 }
 
 void XAudio2SoundDriverModern::AiUpdate(BOOL Wait)
@@ -274,6 +291,7 @@ void XAudio2SoundDriverModern::StopAudioThread()
 		DEBUG_OUTPUT("Audio Thread terminated\n");
 	}
 	hAudioThread = NULL;
+	iCurFrequency = 0;
 	bStopAudioThread = false;
 }
 

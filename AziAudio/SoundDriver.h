@@ -11,13 +11,7 @@
 
 #pragma once
 
-#if defined(_WIN32)
-#include <windows.h>
-#else
-#include <SDL/SDL.h>
-#include <pthread.h>
-#include <unistd.h>
-#endif
+#include <mutex>
 
 /* strcpy() */
 #include <string.h>
@@ -58,11 +52,8 @@ protected:
 	bool m_isValid;
 
 	// Mutex Handle
-#ifdef _WIN32
-	HANDLE m_hMutex;
-#else
-	pthread_mutex_t m_Mutex;
-#endif
+	std::mutex m_mutex;
+	int m_updateFrequency = 0;
 
 	// Variables for AI DMA emulation
 	//int m_AI_CurrentDMABuffer; // Currently playing AI Buffer
@@ -88,10 +79,5 @@ protected:
 
 	SoundDriver(){
 		m_audioIsInitialized = false;
-#ifdef _WIN32
-		m_hMutex = NULL;
-#else
-		m_Mutex = NULL;
-#endif
 	}
 };

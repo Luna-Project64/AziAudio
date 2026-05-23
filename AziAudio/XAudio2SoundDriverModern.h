@@ -83,6 +83,7 @@ protected:
 	static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
 
 private:
+	int    iCurFrequency = 0;
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
 };
