@@ -25,7 +25,7 @@ static IXAudio2MasteringVoice* g_master;
 static bool audioIsPlaying = false;
 static bool canPlay = false;
 
-static u8 bufferData[5][44100 * 4];
+static u8 bufferData[4][44100 * 4];
 static int writeBuffer = 0;
 static int readBuffer = 0;
 static int filledBuffers;
@@ -245,13 +245,13 @@ DWORD WINAPI XAudio2SoundDriverModern::AudioThreadProc(LPVOID lpParameter)
 			// # of BuffersQueued is a knob we can turn for latency vs buffering
 			// 2 is minimum.  Maximum is the size of bufferData which is still TBD (Current 5)
 			// It is always possible to new a buffer prior to submission then free it on completion.  Worth it?
-			while (xvs.BuffersQueued < 4 && driver->bStopAudioThread == false) // Doubled this in hopes it would help... shouldn't cause too much additional latency
+			while (xvs.BuffersQueued < 3 && driver->bStopAudioThread == false) // Doubled this in hopes it would help... shouldn't cause too much additional latency
 			{
 				u32 len = driver->LoadAiBuffer(bufferData[idx], cacheSize);
 				if (len > 0)
 				{
 					driver->PlayBuffer(bufferData[idx], len);
-					idx = (idx + 1) % 5;
+					idx = (idx + 1) % 4;
 				}
 				else
 				{
