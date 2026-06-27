@@ -39,7 +39,6 @@ bool WASAPISoundDriver::ValidateDriver()
 {
 	bool retVal = false;
 	/* Validate a windows audio services end point enumerator object will initialize */
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	const GUID CLSID_MMDeviceEnumerator_Test = { 0xBCDE0395, 0xE52F, 0x467C, 0x8E, 0x3D, 0xC4, 0x57, 0x92, 0x91, 0x69, 0x2E };
 	const GUID IID_IMMDeviceEnumerator_Test = { 0xA95664D2, 0x9614, 0x4F35, 0xA7, 0x46, 0xDE, 0x8D, 0xB6, 0x36, 0x17, 0xE6 };
 	IUnknown* obj;
@@ -51,14 +50,12 @@ bool WASAPISoundDriver::ValidateDriver()
 		obj->Release();
 		retVal = true;
 	}
-	CoUninitialize();
 	return retVal;
 }
 
 WASAPISoundDriver::WASAPISoundDriver()
 {
 	bInitialized = false;
-	m_CoUninit = false;
 	hAudioThread = NULL;
 }
 
@@ -71,15 +68,9 @@ BOOL WASAPISoundDriver::Initialize()
 {
 	IMMDeviceEnumerator *testEnumerator = NULL;
 	HRESULT hr;
-	m_CoUninit = false;
-	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if (FAILED(hr) && (hr != RPC_E_CHANGED_MODE))
 	{
 		EXIT_ON_ERROR(hr);
-	}
-	else
-	{
-		m_CoUninit = true;
 	}
 	hr = CoCreateInstance(
 		CLSID_MMDeviceEnumerator, NULL,
@@ -90,8 +81,6 @@ BOOL WASAPISoundDriver::Initialize()
 	return TRUE;
 Exit:
 	SAFE_RELEASE(testEnumerator);
-	if (m_CoUninit == true)
-		CoUninitialize();
 	return FALSE;
 }
 
@@ -112,8 +101,6 @@ void WASAPISoundDriver::DeInitialize()
 			hAudioThread = NULL;
 		}
 	}
-	if (m_CoUninit == true)
-		CoUninitialize();
 }
 
 void WASAPISoundDriver::SetFrequency(u32 Frequency)
@@ -160,7 +147,6 @@ DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter)
 
 	WAVEFORMATEXTENSIBLE AudioFormat = {};
 
-	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 	EXIT_ON_ERROR(hr);
 
 	// Get ourselves a device enumerator.  This can be used to determine which device we want to write to
@@ -271,7 +257,6 @@ NiceExit:
 	SAFE_RELEASE(pDevice);
 	SAFE_RELEASE(pAudioClient);
 	SAFE_RELEASE(pRenderClient);
-	CoUninitialize();
 
 	DEBUG_OUTPUT("WASAPI: Exiting thread\n");
 	return 0;

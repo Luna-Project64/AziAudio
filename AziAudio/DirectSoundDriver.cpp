@@ -47,7 +47,6 @@ bool DirectSoundDriver::ValidateDriver()
 	const GUID IID_IDirectSound8_Test = { 0xC50A7E93, 0xF395, 0x4834, 0x9E, 0xF6, 0x7F, 0xA9, 0x9D, 0xE5, 0x09, 0x66 };
 
 	/* Validate an DirectSound8 object will initialize */
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	IUnknown* obj;
 	HRESULT hr = CoCreateInstance(CLSID_DirectSound8_Test,
 		NULL, CLSCTX_INPROC_SERVER, IID_IDirectSound8_Test, (void**)&obj);
@@ -56,7 +55,6 @@ bool DirectSoundDriver::ValidateDriver()
 		obj->Release();
 		retVal = true;
 	}
-	CoUninitialize();
 	return retVal;
 }
 
